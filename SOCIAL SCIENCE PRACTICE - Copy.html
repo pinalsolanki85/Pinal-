@@ -1,0 +1,830 @@
+﻿<!DOCTYPE html>
+<html lang="gu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>School Quiz PRO - આંતરોલ  પ્રાથમિક શાળા</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+/* Base Styling */
+        body { margin:0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; min-height:100vh; display:flex; justify-content:center; align-items:center; background:#1a1a2e; }
+        .hidden { display:none !important; }
+
+       /* Colorful Working Area (Card with River Theme) */
+        .card { 
+            max-width: 650px; width: 90%; margin: 20px; padding: 30px; 
+            border-radius: 30px; 
+            border: 4px solid #ffffff;
+            position: relative; /* આ જરૂરી છે ફૂટર માટે */
+            padding-bottom: 70px; /* ફૂટર માટે નીચે જગ્યા */
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            background: linear-gradient(120deg, #ff9a9e, #fad0c4, #a18cd1, #fbc2eb); 
+            background-size: 400% 400%; 
+            animation: riverFlow 15s ease infinite; 
+        }
+       
+        @keyframes riverFlow { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+            
+		/* Footer inside card */
+        .p_info {
+            position: absolute;
+            bottom: 15px;
+            left: 25px;
+            font-size: 13px;
+            pointer-events: none;
+		opacity:0.85;
+            user-select: none;
+        }
+
+        /* Colorful Working Area (Card) */
+        
+
+        /* હેડર લેઆઉટમાં ફેરફાર */
+    header { 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    position: relative; 
+    margin-bottom: 20px; 
+    padding-left: 90px; /* લોગો નાનો કર્યો એટલે પેડિંગ ઘટાડ્યું */
+    padding-right: 10px; 
+    min-height: 90px; 
+    text-align: center;
+}
+
+    header img { 
+    position: absolute; 
+    left: 0; 
+    top: 50%; /* વર્ટિકલ વચ્ચે લાવવા માટે */
+    transform: translateY(-50%);
+    height: 70px;  /* લોગોની સાઈઝ ઘટાડી */
+    width: 70px;   /* લોગોની સાઈઝ ઘટાડી */
+    object-fit: cover; 
+    background: #fff; 
+    padding: 3px; 
+    border-radius: 50%; 
+    border: 3px solid #673ab7;
+    box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+}
+        header div { text-align: center; }
+        h1 { color: #4a148c; margin: 0; font-size: 24px; }
+        p { color: #d81b60; font-weight: bold; margin: 5px 0 0 0; }
+
+        /* Buttons and Inputs */
+        input, select, button { width:100%; padding:14px; margin:8px 0; border-radius:12px; border:none; font-size:16px; background:#f5f5f5; }
+        button { 
+            background: linear-gradient(to right, #673ab7, #9c27b0); color:#fff; font-weight:bold; cursor:pointer; 
+            transition: 0.3s;
+        }
+        button:hover { transform: scale(1.02); filter: brightness(1.1); }
+
+        /* Quiz Palette */
+        .palette { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 20px; padding: 10px; }
+        .palette button { width: 40px; height: 40px; border-radius: 50%; border: none; background: #fff; color: #673ab7; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .palette button.active { background: #673ab7; color: white; transform: scale(1.1); }
+
+        /* Quiz Options */
+        .option { padding: 15px; border-radius: 12px; margin: 10px 0; background: #ffffff; color: #333; cursor: pointer; border: 2px solid #e0e0e0; font-weight: 600; transition: 0.3s; }
+        .option:hover { background: #673ab7; color: white; border-color: #673ab7; }
+        .right { background: #2ecc71 !important; color: white !important; }
+        .wrong { background: #e74c3c !important; color: white !important; }
+        .top { display:flex; justify-content:space-between; font-weight:bold; margin-bottom:15px; }
+        #result-area { text-align: center; }
+         #certificate-display {
+    background: white;
+    border: 10px double #0561af;
+    padding: 25px;
+    border-radius: 20px;
+    color: #333;
+    margin-bottom: 20px;
+}
+	/* Result Stats Styling */
+.stat-box {
+    display: flex;
+    justify-content: space-around;
+    gap: 15px;
+    margin: 20px 0;
+}
+.stat-item {
+    flex: 1;
+    padding: 15px;
+    border-radius: 20px;
+    background: white;
+    box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+    text-align: center;
+}
+.stat-value {
+    font-size: 35px; /* આંકડા મોટા કર્યા */
+    font-weight: 900;
+    display: block;
+    line-height: 1;
+}
+.stat-label {
+    font-size: 14px;
+    font-weight: bold;
+    color: #555;
+    margin-top: 5px;
+    display: block;
+}
+
+/* Result Table Highlight */
+#teacher table {
+    border-radius: 15px;
+    overflow: hidden;
+    border: none;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+#teacher thead {
+    background: linear-gradient(135deg, #4a148c, #673ab7);
+    color: white;
+}
+#teacher th { padding: 15px; text-transform: uppercase; font-size: 14px; }
+#teacher td { padding: 12px; border-bottom: 1px solid #eee; }
+#teacher tr:hover { background-color: #f1f1f1; }
+ 
+.res-score { color: #2ecc71; font-weight: 900; font-size: 18px; }
+.res-percent { color: #e67e22; font-weight: 900; font-size: 18px; }
+#table tr:nth-child(even) { background-color: #f9f9f9; }
+#table td { text-align: center; border: 1px solid #eee; }
+
+/* સ્કોરને અપૂર્ણાંક (Fraction) જેવો ઉભો બતાવવા માટે */
+.fraction {
+    display: inline-flex;
+    flex-direction: column;
+    vertical-align: middle;
+    align-items: center;
+    font-weight: bold;
+}
+.numerator {
+    border-bottom: 2px solid #4a148c; /* આ આડી લાઈન બનાવશે */
+    padding: 0 5px;
+    color: #27ae60; /* મેળવેલ ગુણનો રંગ */
+    font-size: 18px;
+}
+.denominator {
+    padding: 0 5px;
+    color: #444; /* કુલ ગુણનો રંગ */
+    font-size: 16px;
+}
+  
+
+   #capture-area {
+    max-width: 100%;
+    box-sizing: border-box;
+}
+@media screen and (max-width: 600px) {
+    #capture-area {
+        padding: 15px !important; /* મોબાઈલ માટે પેડિંગ ઓછું કર્યું */
+    }
+}
+
+    </style>
+</head>
+
+<body>
+
+    <div class="card" id="home">
+        <header>
+          <div>
+                <h1>રાજકોટ પ્રાથમિક શાળા</h1>
+<p>જ્ઞાન સાધના -સામાજીક વિજ્ઞાન પ્રેક્ટિસ ની મોજીલી ક્વિઝ</p>
+<p>શ્રી બળવંતભાઈ ઠાકોર</p>
+
+
+</div>
+</header>
+
+<input id="roll" placeholder="રોલ નંબર">
+<input id="studentName" placeholder="વિદ્યાર્થીનું નામ">
+
+<select id="subject" onchange="loadChapters();setTheme();">
+<option value="">વિષય પસંદ કરો</option>
+<option value="maths">જ્ઞાન સાધના સામા.વિજ્ઞાનની તૈયારી </option>
+
+
+</select>
+
+<select id="chapter">
+<option value="">પાઠ પસંદ કરો</option>
+</select>
+
+<button onclick="startQuiz()">ક્વિઝ શરૂ કરો</button>
+<button onclick="openTeacher()" style="background:#444;">👨‍🏫 શિક્ષક લોગિન</button>
+    </div>
+
+<!-- QUIZ -->
+<div class="card hidden" id="quiz">
+        <div class="top"><div id="progress"></div><div id="timer"></div></div>
+        <h3 id="q"></h3>
+        <div id="opts"></div>
+        <div id="palette" class="palette"></div>
+    </div>
+
+    <div class="card hidden" id="result">
+        <h2 id="score"></h2>
+        <div id="grade" style="font-size: 20px; font-weight: bold; margin-bottom:10px;"></div>
+        <div id="details"></div>
+        
+        <button onclick="goHome()">🏠 મુખ્ય મેનુ</button>
+    </div>
+
+    <div class="card hidden" id="teacherLoginBox">
+        <h3>શિક્ષક લોગિન</h3>
+        <input type="password" id="tpass" placeholder="પાસવર્ડ">
+        <button onclick="teacherLogin()">LOGIN</button>
+        <button onclick="goHome()" style="background:#444;">🏠 HOME</button>
+    </div>
+
+    <div class="card hidden" id="teacher">
+        <h3>📊 પરિણામ પત્રક</h3>
+        <table border="1" width="100%" style="background:#fff; color:#333; border-collapse:collapse; padding:10px;">
+            <thead>
+                <tr><th>રોલ</th><th>નામ</th><th>વિષય</th><th>પાઠ</th><th>સ્કોર</th><th>ટકા</th><th>તારીખ</th></tr>
+            </thead>
+            <tbody id="table"></tbody>
+        </table>
+        <br>
+        <button onclick="downloadExcel()">📥 Excel Download</button>
+        <button onclick="clearAllResults()" style="background:#e74c3c;">🗑️ બધું ડિલીટ કરો</button>
+        <button onclick="goHome()" style="background:#444;">🏠 મુખ્ય મેનુ</button>
+    </div>
+<div id="result-area" class="hidden">
+    <div id="certificate-display">
+        </div>
+    <button class="btn" onclick="location.reload()">ફરીથી ટેસ્ટ આપો</button>
+</div>
+<script>
+     // Footer Content
+       
+        // Quiz Data and Logic
+ const DATA = {
+     maths: {
+   "સામાજિક વિજ્ઞાન ( જ્ઞાન સાધના ની તૈયારી)": [
+    {q:"ભારતમાં આવવાનો જળમાર્ગ કોણે શોધ્યો હતો?", o:["કોલંબસ", "વાસ્કો-દ-ગામા", "પ્રિન્સ હેનરી", "મેગેલન"], a:"વાસ્કો-દ-ગામા"},
+    {q:"બક્સરનું યુદ્ધ કઈ સાલમાં થયું હતું?", o:["1757", "1764", "1857", "1526"], a:"1764"},
+    {q:"ભારતમાં અંગ્રેજી શિક્ષણની શરૂઆત કોણે કરાવી હતી?", o:["લોર્ડ વિલિયમ બેન્ટિક", "લોર્ડ ડેલહાઉસી", "લોર્ડ મેકોલે", "લોર્ડ કર્ઝન"], a:"લોર્ડ મેકોલે"},
+    {q:"જલિયાવાલા બાગનો હત્યાકાંડ કયા શહેરમાં થયો હતો?", o:["દિલ્હી", "લાહોર", "અમૃતસર", "ચંડીગઢ"], a:"અમૃતસર"},
+    {q:"ભારતની રાષ્ટ્રીય અભિલેખાગાર ક્યાં આવેલી છે?", o:["મુંબઈ", "કોલકાતા", "ચેન્નાઈ", "દિલ્હી"], a:"દિલ્હી"},
+    {q:"ભારતમાં રેલવેની શરૂઆત કયા વર્ષમાં થઈ હતી?", o:["1853", "1857", "1901", "1833"], a:"1853"},
+    {q:"નીચેનામાંથી કયું સંસાધન અક્ષય (પુનઃપ્રાપ્ય) છે?", o:["કોલસો", "પેટ્રોલિયમ", "સૌર ઉર્જા", "કુદરતી વાયુ"], a:"સૌર ઉર્જા"},
+    {q:"વિશ્વમાં સૌથી વધુ વસ્તી ધરાવતો દેશ કયો છે?", o:["ભારત", "ચીન", "અમેરિકા", "રશિયા"], a:"ભારત"},
+    {q:"ભારતનું બંધારણ ક્યારે અમલમાં આવ્યું?", o:["15 ઓગસ્ટ 1947", "26 જાન્યુઆરી 1950", "26 નવેમ્બર 1949", "30 જાન્યુઆરી 1948"], a:"26 જાન્યુઆરી 1950"},
+    {q:"રાજ્યસભાના અધ્યક્ષ કોણ હોય છે?", o:["રાષ્ટ્રપતિ", "વડાપ્રધાન", "ઉપરાષ્ટ્રપતિ", "સ્પીકર"], a:"ઉપરાષ્ટ્રપતિ"},
+    {q:"કઈ ખેતીમાં પાકની સાથે પશુપાલન પણ કરવામાં આવે છે?", o:["સ્થળાંતરિત ખેતી", "મિશ્ર ખેતી", "બાગાયતી ખેતી", "સઘન ખેતી"], a:"મિશ્ર ખેતી"},
+    {q:"લોખંડ-પોલાદનો ઉદ્યોગ કયા પ્રકારનો ઉદ્યોગ છે?", o:["કૃષિ આધારિત", "ખનીજ આધારિત", "સમુદ્ર આધારિત", "વન આધારિત"], a:"ખનીજ આધારિત"},
+    {q:"ભારતના બંધારણના ઘડવૈયા કોણ ગણાય છે?", o:["ગાંધીજી", "સરદાર પટેલ", "ડૉ. બી. આર. આંબેડકર", "જવાહરલાલ નહેરુ"], a:"ડૉ. બી. આર. આંબેડકર"},
+    {q:"ભારતની સર્વોચ્ચ અદાલત ક્યાં આવેલી છે?", o:["અમદાવાદ", "મુંબઈ", "નવી દિલ્હી", "કોલકાતા"], a:"નવી દિલ્હી"},
+    {q:"કયા વાયુને લીધે પૃથ્વી પર ગરમીનું પ્રમાણ વધે છે?", o:["ઓક્સિજન", "નાઈટ્રોજન", "કાર્બન ડાયોક્સાઈડ", "આર્ગોન"], a:"કાર્બન ડાયોક્સાઈડ"},
+
+    {q:"ભારતનું બંધારણ ઘડવા માટેની ખરડા સમિતિના અધ્યક્ષ કોણ હતા?", o:["જવાહરલાલ નહેરુ", "ડૉ. બી. આર. આંબેડકર", "સરદાર પટેલ", "રાજેન્દ્ર પ્રસાદ"], a:"ડૉ. બી. આર. આંબેડકર"},
+    {q:"બંધારણ સભાના અધ્યક્ષ કોણ હતા?", o:["ડૉ. રાજેન્દ્ર પ્રસાદ", "ગાંધીજી", "મૌલાના આઝાદ", "સુભાષચંદ્ર બોઝ"], a:"ડૉ. રાજેન્દ્ર પ્રસાદ"},
+    {q:"ભારતીય બંધારણ કઈ તારીખે સ્વીકારવામાં આવ્યું (પસાર થયું)?", o:["26 જાન્યુઆરી 1950", "15 ઓગસ્ટ 1947", "26 નવેમ્બર 1949", "9 ડિસેમ્બર 1946"], a:"26 નવેમ્બર 1949"},
+    {q:"બંધારણ ઘડવામાં કેટલો સમય લાગ્યો હતો?", o:["2 વર્ષ 11 માસ 18 દિવસ", "3 વર્ષ", "1 વર્ષ 8 માસ", "2 વર્ષ 5 માસ"], a:"2 વર્ષ 11 માસ 18 દિવસ"},
+    {q:"ભારતના બંધારણની શરૂઆત શેનાથી થાય છે?", o:["મૂળભૂત હકો", "આમુખ", "રાજનીતિના સિદ્ધાંતો", "કાયદાઓ"], a:"આમુખ"},
+    {q:"દુનિયાનું સૌથી મોટું લિખિત બંધારણ કયા દેશનું છે?", o:["અમેરિકા", "બ્રિટન", "ભારત", "રશિયા"], a:"ભારત"},
+    {q:"કેટલા વર્ષની ઉંમરે ભારતમાં મતાધિકાર પ્રાપ્ત થાય છે?", o:["15 વર્ષ", "18 વર્ષ", "21 વર્ષ", "25 વર્ષ"], a:"18 વર્ષ"},
+    {q:"ભારત દેશ કેવું રાષ્ટ્ર છે?", o:["બિનસાંપ્રદાયિક", "ધાર્મિક", "સામ્યવાદી", "રાજાશાહી"], a:"બિનસાંપ્રદાયિક"},
+    {q:"કયા હક વિના અન્ય હકો અર્થહીન છે?", o:["સમાનતાનો હક", "સ્વતંત્રતાનો હક", "બંધારણીય ઇલાજોનો હક", "ધાર્મિક સ્વાતંત્ર્ય"], a:"બંધારણીય ઇલાજોનો હક"},
+    {q:"લોકશાહીમાં આખરી સત્તા કોના હાથમાં હોય છે?", o:["રાષ્ટ્રપતિ", "વડાપ્રધાન", "લોકો (પ્રજા)", "સંસદ"], a:"લોકો (પ્રજા)"},
+    {q:"શિક્ષણનો હક (RTE) કયા વર્ષથી અમલમાં આવ્યો?", o:["2005", "2009", "2010", "2012"], a:"2010"},
+    {q:"મૂળભૂત ફરજો બંધારણમાં કયા સુધારા દ્વારા ઉમેરવામાં આવી?", o:["42મો સુધારો", "44મો સુધારો", "61મો સુધારો", "73મો સુધારો"], a:"42મો સુધારો"},
+    {q:"લોકસભાના સભ્યોની મુદત કેટલા વર્ષની હોય છે?", o:["4 વર્ષ", "5 વર્ષ", "6 વર્ષ", "કાયમી"], a:"5 વર્ષ"},
+    {q:"ભારતના પ્રથમ રાષ્ટ્રપતિ કોણ હતા?", o:["ડૉ. રાધાકૃષ્ણન", "ડૉ. રાજેન્દ્ર પ્રસાદ", "વી.વી. ગીરી", "ઝકીર હુસૈન"], a:"ડૉ. રાજેન્દ્ર પ્રસાદ"},
+    {q:"સંસદનું ઉપલું ગૃહ કયું છે?", o:["લોકસભા", "રાજ્યસભા", "વિધાનસભા", "મંત્રીમંડળ"], a:"રાજ્યસભા"},
+
+    {q:"નીચેનામાંથી કયો પાક 'રોકડિયો પાક' ગણાય છે?", o:["ઘઉં", "બાજરી", "કપાસ", "મકાઈ"], a:"કપાસ"},
+    {q:"ભારતમાં કયા રાજ્યમાં ચાનું ઉત્પાદન સૌથી વધુ થાય છે?", o:["ગુજરાત", "અસમ", "કર્ણાટક", "કેરળ"], a:"અસમ"},
+    {q:"ગુજરાતનો કયો પ્રદેશ ઉત્તમ કપાસ માટે જાણીતો છે?", o:["કાનમ", "ચરૌતર", "ભાલ", "હાલાર"], a:"કાનમ"},
+    {q:"દુનિયામાં ખેતીના કયા પ્રકારમાં સૌથી વધુ શ્રમની જરૂર પડે છે?", o:["બાગાયતી ખેતી", "સઘન ખેતી", "ઝૂમ ખેતી", "સૂકી ખેતી"], a:"સઘન ખેતી"},
+    {q:"ખાંડના ઉદ્યોગ માટે કયો કાચો માલ જરૂરી છે?", o:["કપાસ", "શેરડી", "મગફળી", "સોયાબીન"], a:"શેરડી"},
+    {q:"કયા પ્રકારની જમીન 'રેગુર' તરીકે ઓળખાય છે?", o:["કાળી જમીન", "રાતી જમીન", "કાંપની જમીન", "રેતાળ જમીન"], a:"કાળી જમીન"},
+    {q:"સફેદ સોનું (White Gold) કયા પાકને કહેવામાં આવે છે?", o:["ચોખા", "કપાસ", "શેરડી", "તલ"], a:"કપાસ"},
+    {q:"ગુજરાતનો કયો જિલ્લો 'તમાકુ' ના ઉત્પાદન માટે જાણીતો છે?", o:["ખેડા", "આણંદ", "બંને (ચરૌતર)", "મહેસાણા"], a:"બંને (ચરૌતર)"},
+    {q:"કોફીના ઉત્પાદન માટે કયું રાજ્ય જાણીતું છે?", o:["મહારાષ્ટ્ર", "તામિલનાડુ", "કર્ણાટક", "પંજાબ"], a:"કર્ણાટક"},
+    {q:"વરસાદના પાણીનો સંગ્રહ કરવાની પદ્ધતિને શું કહેવાય?", o:["વોટર હાર્વેસ્ટિંગ", "કેનાલ સિસ્ટમ", "ડેમ", "સિંચાઈ"], a:"વોટર હાર્વેસ્ટિંગ"},
+
+    {q:"પ્લાસીનું યુદ્ધ કયા વર્ષમાં થયું હતું?", o:["1757", "1764", "1857", "1526"], a:"1757"},
+    {q:"ભારતમાં 'દસ્તક' પ્રથાનો અંત કોણે લાવ્યો હતો?", o:["રોબર્ટ ક્લાઈવ", "વોરન હેસ્ટિંગ્સ", "લોર્ડ કોર્નવોલિસ", "ડેલહાઉસી"], a:"વોરન હેસ્ટિંગ્સ"},
+    {q:"કયા મરાઠા પેશ્વા 'નાના સાહેબ' તરીકે ઓળખાતા હતા?", o:["બાજીરાવ પ્રથમ", "બાલાજી બાજીરાવ", "માધવરાવ", "નારાયણરાવ"], a:"બાલાજી બાજીરાવ"},
+    {q:"1857 ના સંગ્રામનો પ્રથમ શહીદ કોણ હતો?", o:["નાના સાહેબ", "મંગલ પાંડે", "તાત્યા ટોપે", "કુંવરસિંહ"], a:"મંગલ પાંડે"},
+    {q:"સતીપ્રથા પર પ્રતિબંધ મૂકતો કાયદો કોણે ઘડ્યો હતો?", o:["લોર્ડ ડેલહાઉસી", "લોર્ડ વિલિયમ બેન્ટિક", "લોર્ડ રિપન", "લોર્ડ કર્ઝન"], a:"લોર્ડ વિલિયમ બેન્ટિક"},
+    {q:"ગાંધીજીએ 'દાંડી કૂચ' કયા સત્યાગ્રહ માટે કરી હતી?", o:["ખેડા સત્યાગ્રહ", "બારડોલી સત્યાગ્રહ", "મીઠાનો સત્યાગ્રહ", "ચંપારણ સત્યાગ્રહ"], a:"મીઠાનો સત્યાગ્રહ"},
+    {q:"'કરો યા મરો' નો નારો ગાંધીજીએ કઈ લડતમાં આપ્યો હતો?", o:["અસહકાર આંદોલન", "હિંદ છોડો આંદોલન", "ખિલાફત આંદોલન", "સવિનય કાનૂન ભંગ"], a:"હિંદ છોડો આંદોલન"},
+    {q:"આઝાદ હિંદ ફોજની રચના કોણે કરી હતી?", o:["સુભાષચંદ્ર બોઝ", "રાસબિહારી બોઝ", "ભગતસિંહ", "ચંદ્રશેખર આઝાદ"], a:"રાસબિહારી બોઝ"},
+    {q:"લોખંડી પુરુષ તરીકે કોણ ઓળખાય છે?", o:["મહાત્મા ગાંધી", "જવાહરલાલ નહેરુ", "સરદાર વલ્લભભાઈ પટેલ", "લોકમાન્ય ટીળક"], a:"સરદાર વલ્લભભાઈ પટેલ"},
+    {q:"બારડોલી સત્યાગ્રહના નેતા કોણ હતા?", o:["સરદાર પટેલ", "ગાંધીજી", "મોહનલાલ પંડ્યા", "મહાદેવભાઈ દેસાઈ"], a:"સરદાર પટેલ"},
+
+    {q:"ભારતની સર્વોચ્ચ અદાલત (Supreme Court) ક્યાં આવેલી છે?", o:["મુંબઈ", "ચેન્નાઈ", "દિલ્હી", "અમદાવાદ"], a:"દિલ્હી"},
+    {q:"બંધારણ મુજબ રાજ્યના વડા કોણ ગણાય છે?", o:["મુખ્યમંત્રી", "રાજ્યપાલ", "વડાપ્રધાન", "રાષ્ટ્રપતિ"], a:"રાજ્યપાલ"},
+    {q:"ધારાસભાનું નીચલું ગૃહ કયા નામે ઓળખાય છે?", o:["વિધાનપરિષદ", "વિધાનસભા", "લોકસભા", "રાજ્યસભા"], a:"વિધાનસભા"},
+    {q:"ન્યાયતંત્રનું સૌથી નીચલું સ્તર કઈ અદાલત છે?", o:["વડી અદાલત", "તાલુકા અદાલત", "જિલ્લા અદાલત", "લોક અદાલત"], a:"તાલુકા અદાલત"},
+    {q:"લોકસભાના સભ્યોની સંખ્યા કેટલી છે?", o:["543", "250", "182", "545"], a:"543"},
+    {q:"કઈ અદાલત 'નઝીરી અદાલત' (Court of Records) તરીકે ઓળખાય છે?", o:["તાલુકા અદાલત", "વડી અદાલત (High Court)", "જિલ્લા અદાલત", "લોક અદાલત"], a:"વડી અદાલત (High Court)"},
+
+
+
+    {q:"કઈ જમીન કપાસની જમીન તરીકે ઓળખાય છે?", o:["કાંપની જમીન", "કાળી જમીન", "પહાડી જમીન", "રાતી જમીન"], a:"કાળી જમીન"},
+    {q:"નીચેનામાંથી કયું પ્રાણી ગુજરાતના ગીરના જંગલોમાં જ જોવા મળે છે?", o:["વાઘ", "સિંહ", "ચિત્તો", "રીંછ"], a:"સિંહ"},
+    {q:"પૃથ્વી પર જલાવરણ કેટલા ટકા ભાગ રોકે છે?", o:["29%", "71%", "50%", "97%"], a:"71%"},
+    {q:"કયા ઉદ્યોગને 'સનરાઈઝ ઇન્ડસ્ટ્રી' કહેવામાં આવે છે?", o:["લોખંડ-પોલાદ", "સુતરાઉ કાપડ", "ઇન્ફોર્મેશન ટેકનોલોજી (IT)", "ખાંડ ઉદ્યોગ"], a:"ઇન્ફોર્મેશન ટેકનોલોજી (IT)"},
+    {q:"ભારતમાં સૌથી વધુ જંગલો કયા રાજ્યમાં આવેલા છે?", o:["ગુજરાત", "હરિયાણા", "મિઝોરમ/મધ્યપ્રદેશ", "રાજસ્થાન"], a:"મિઝોરમ/મધ્યપ્રદેશ"},
+
+
+    // ઇતિહાસ: મહેસૂલ અને સુધારકો
+    {q:"બંગાળમાં 'કાયમી જમાબંધી' મહેસૂલ પદ્ધતિ કોણે દાખલ કરી હતી?", o:["લોર્ડ કોર્નવોલિસ", "થોમસ મુનરો", "હોલ્ટ મેકેન્ઝી", "રોબર્ટ ક્લાઈવ"], a:"લોર્ડ કોર્નવોલિસ"},
+    {q:"મહાલવારી મહેસૂલ પદ્ધતિમાં 'મહાલ' શબ્દનો અર્થ શું થાય છે?", o:["ખેતર", "તાલુકો", "ગ્રામ અથવા ગ્રામનો સમૂહ", "જિલ્લો"], a:"ગ્રામ અથવા ગ્રામનો સમૂહ"},
+    {q:"થોમસ મુનરો દ્વારા કઈ મહેસૂલ પદ્ધતિ દાખલ કરવામાં આવી હતી?", o:["કાયમી જમાબંધી", "રૈયતવારી", "મહાલવારી", "ઇજારેદારી"], a:"રૈયતવારી"},
+    {q:"'સત્યશોધક સમાજ'ની સ્થાપના કોણે કરી હતી?", o:["રાજારામ મોહનરાય", "જ્યોતિરાવ ફૂલે", "દયાનંદ સરસ્વતી", "આત્મારામ પાંડુરંગ"], a:"જ્યોતિરાવ ફૂલે"},
+    {q:"સ્વામી વિવેકાનંદના ગુરુનું નામ શું હતું?", o:["રામકૃષ્ણ પરમહંસ", "સ્વામી દયાનંદ", "રવીન્દ્રનાથ ટાગોર", "કેશવચંદ્ર સેન"], a:"રામકૃષ્ણ પરમહંસ"},
+    {q:"'વેદો તરફ પાછા વળો'નું સૂત્ર કોણે આપ્યું હતું?", o:["સ્વામી વિવેકાનંદ", "સ્વામી દયાનંદ સરસ્વતી", "ઈશ્વરચંદ્ર વિદ્યાસાગર", "મહાદેવ ગોવિંદ રાનડે"], a:"સ્વામી દયાનંદ સરસ્વતી"},
+
+    // ભૂગોળ: ઉદ્યોગો અને ખનીજ
+    {q:"ટાટા આયર્ન એન્ડ સ્ટીલ કંપની (TISCO) ની સ્થાપના કઈ નદીના કિનારે થઈ હતી?", o:["ગંગા", "નર્મદા", "સુવર્ણરેખા", "દામોદર"], a:"સુવર્ણરેખા"},
+    {q:"વિશ્વમાં 'સિલિકોન વેલી' તરીકે કયું શહેર ઓળખાય છે?", o:["બેંગલુરુ", "કેલિફોર્નિયા", "ટોક્યો", "ન્યુયોર્ક"], a:"કેલિફોર્નિયા"},
+    {q:"કાળું સોનું (Black Gold) કોને કહેવામાં આવે છે?", o:["કોલસો", "લોખંડ", "પેટ્રોલિયમ", "મેંગેનીઝ"], a:"પેટ્રોલિયમ"},
+    {q:"ભારતનું 'માન્ચેસ્ટર' કયા શહેરને કહેવામાં આવતું હતું?", o:["મુંબઈ", "અમદાવાદ", "સૂરત", "કાનપુર"], a:"અમદાવાદ"},
+    {q:"નીચેનામાંથી કયું ખનીજ અધાતુમય ખનીજ છે?", o:["લોખંડ", "તાંબુ", "ચૂનાનો પથ્થર", "સોનું"], a:"ચૂનાનો પથ્થર"},
+
+    // નાગરિક શાસ્ત્ર: સંસદ અને કાયદો
+    {q:"સંસદના બંને ગૃહોની સંયુક્ત બેઠકની અધ્યક્ષતા કોણ કરે છે?", o:["રાષ્ટ્રપતિ", "વડાપ્રધાન", "લોકસભાના અધ્યક્ષ (સ્પીકર)", "ઉપરાષ્ટ્રપતિ"], a:"લોકસભાના અધ્યક્ષ (સ્પીકર)"},
+    {q:"ભારતમાં કોઈપણ કાયદો કોની મંજૂરી બાદ જ અમલમાં આવે છે?", o:["વડાપ્રધાન", "સર્વોચ્ચ અદાલત", "રાષ્ટ્રપતિ", "લોકપાલ"], a:"રાષ્ટ્રપતિ"},
+    {q:"રાજ્યસભામાં રાષ્ટ્રપતિ દ્વારા કેટલા સભ્યોની નિમણૂક કરવામાં આવે છે?", o:["2", "10", "12", "15"], a:"12"},
+    {q:"માહિતી મેળવવાનો અધિકાર (RTI) કયા વર્ષથી અમલમાં આવ્યો?", o:["2002", "2005", "2009", "2011"], a:"2005"},
+    {q:"બંધારણની કઈ કલમ દ્વારા 'અસ્પૃશ્યતા' નાબૂદ કરવામાં આવી છે?", o:["કલમ 14", "કલમ 15", "કલમ 17", "કલમ 21"], a:"કલમ 17"},
+
+  
+    // આદિવાસી અને ખેડૂત વિદ્રોહ
+    {q:"'ઉલગુલાન' વિદ્રોહનું નેતૃત્વ કોણે કર્યું હતું?", o:["કાન્હુ", "સિદ્ધુ", "બિરસા મુંડા", "રૂપસિંહ નાયક"], a:"બિરસા મુંડા"},
+    {q:"બિરસા મુંડાનો જન્મ કયા ગામમાં થયો હતો?", o:["ઉલીહાતુ", "ચોટા નાગપુર", "રાંચી", "પાલનપુર"], a:"ઉલીહાતુ"},
+    {q:"સંથાલ વિદ્રોહ કયા વિસ્તારમાં થયો હતો?", o:["ગુજરાત", "બંગાળ-બિહાર (રાજમહેલની ટેકરીઓ)", "મહારાષ્ટ્ર", "પંજાબ"], a:"બંગાળ-બિહાર (રાજમહેલની ટેકરીઓ)"},
+    {q:"ગુજરાતમાં 'પંચમહાલ' ભીલ વિદ્રોહના નેતા કોણ હતા?", o:["જોરિયા પરમેશ્વર", "ગોવિંદ ગુરુ", "રૂપસિંહ નાયક", "બિરસા મુંડા"], a:"રૂપસિંહ નાયક"},
+    {q:"ગડકરી વિદ્રોહ કયા સ્થળે થયો હતો?", o:["કોલ્હાપુર", "સતારા", "પુણે", "નાગપુર"], a:"કોલ્હાપુર"},
+    {q:"નીલ (ગળી) સત્યાગ્રહ માટે ગાંધીજીએ કયું સ્થળ પસંદ કર્યું હતું?", o:["ખેડા", "અમદાવાદ", "ચંપારણ", "બારડોલી"], a:"ચંપારણ"},
+
+    
+    {q:"ભારતમાં સૌપ્રથમ સુતરાઉ કાપડની મિલ ક્યાં સ્થાપવામાં આવી હતી?", o:["અમદાવાદ", "મુંબઈ", "સૂરત", "કોલકાતા"], a:"મુંબઈ"},
+    {q:"બંગાળના ભાગલા કયા વર્ષમાં કરવામાં આવ્યા હતા?", o:["1905", "1911", "1920", "1942"], a:"1905"},
+    {q:"બંધારણના કયા આર્ટિકલ (કલમ) મુજબ બાળમજૂરી પર પ્રતિબંધ છે?", o:["કલમ 17", "કલમ 21", "કલમ 24", "કલમ 32"], a:"કલમ 24"},
+    {q:"નીચેનામાંથી કયું સંસાધન બિન-નવીનીકરણીય (ખૂટી જાય તેવું) છે?", o:["પવન ઉર્જા", "કોલસો", "સૌર ઉર્જા", "ભૂતાપીય ઉર્જા"], a:"કોલસો"},
+    {q:"આઝાદી સમયે ભારતના રજવાડાઓનું વિલીનીકરણ કરવાનું ભગીરથ કાર્ય કોણે કર્યું?", o:["ગાંધીજી", "સરદાર વલ્લભભાઈ પટેલ", "નેહરુ", "રાજેન્દ્ર પ્રસાદ"], a:"સરદાર વલ્લભભાઈ પટેલ"},
+    {q:"ભારતની પ્રમાણ સમય રેખા (Standard Time Line) કયા શહેર પાસેથી પસાર થાય છે?", o:["અમદાવાદ", "અલ્હાબાદ (પ્રયાગરાજ)", "દિલ્હી", "ચેન્નાઈ"], a:"અલ્હાબાદ (પ્રયાગરાજ)"},
+    {q:"સ્વતંત્ર ભારતના પ્રથમ ગવર્નર જનરલ કોણ હતા?", o:["લોર્ડ માઉન્ટબેટન", "ચક્રવર્તી રાજગોપાલાચારી", "જવાહરલાલ નેહરુ", "ડો. આંબેડકર"], a:"લોર્ડ માઉન્ટબેટન"},
+    {q:"પંચાયતી રાજનું માળખું કેટલા સ્તરનું હોય છે?", o:["બે", "ત્રણ", "ચાર", "પાંચ"], a:"ત્રણ"},
+    
+    // 1857 ના સંગ્રામના મુખ્ય સ્થળો અને નેતાઓ
+    {q:"1857 ના સંગ્રામમાં કાનપુરનું નેતૃત્વ કોણે સંભાળ્યું હતું?", o:["નાના સાહેબ પેશ્વા", "બહાદુરશાહ ઝફર", "કુંવરસિંહ", "લક્ષ્મીબાઈ"], a:"નાના સાહેબ પેશ્વા"},
+    {q:"બિહારમાં (જગદીશપુર) 1857 ના સંગ્રામના નેતા કોણ હતા?", o:["ખાન બહાદુર ખાન", "કુંવરસિંહ", "તાત્યા ટોપે", "બેગમ હજરત મહલ"], a:"કુંવરસિંહ"},
+    {q:"ઝાંસીની રાણી લક્ષ્મીબાઈને મદદ કરનાર સેનાપતિ કોણ હતા?", o:["મંગલ પાંડે", "તાત્યા ટોપે", "નાના સાહેબ", "કુંવરસિંહ"], a:"તાત્યા ટોપે"},
+    {q:"ગુજરાતમાં 1857 ના સંગ્રામની શરૂઆત ક્યાંથી થઈ હતી?", o:["અમદાવાદ (લશ્કરી છાવણી)", "વડોદરા", "ખેડા", "આણંદ"], a:"અમદાવાદ (લશ્કરી છાવણી)"},
+    {q:"ખેડા જિલ્લામાં આણંદના કયા નેતાએ સંગ્રામનું નેતૃત્વ કર્યું હતું?", o:["ગરબડદાસ મુખી", "જોરિયા પરમેશ્વર", "જીવાભાઈ ઠાકોર", "મગનલાલ"], a:"ગરબડદાસ મુખી"},
+    {q:"ચોટા ઉદેપુર કબજે કરવામાં તાત્યા ટોપેને કેટલો સમય લાગ્યો હતો?", o:["1 દિવસ", "1 મહિનો", "1 અઠવાડિયું", "1 વર્ષ"], a:"1 દિવસ"},
+    {q:"સંગ્રામના સમયે ભારતનો ગવર્નર જનરલ કોણ હતો?", o:["લોર્ડ ડેલહાઉસી", "લોર્ડ કેનિંગ", "લોર્ડ કર્ઝન", "લોર્ડ રિપન"], a:"લોર્ડ કેનિંગ"},
+    {q:"સાવરકર દ્વારા 1857 ના સંગ્રામને કયું નામ આપવામાં આવ્યું હતું?", o:["બળવો", "સિપાહી વિદ્રોહ", "ભારતનો પ્રથમ સ્વાતંત્ર્ય સંગ્રામ", "સ્થાનિક તોફાન"], a:"ભારતનો પ્રથમ સ્વાતંત્ર્ય સંગ્રામ"},
+    {q:"મંગલ પાંડે કઈ ટુકડીના સૈનિક હતા?", o:["19મી પલટન", "34મી પલટન", "10મી પલટન", "50મી પલટન"], a:"34મી પલટન"}
+
+    
+     
+ ]
+
+
+ 
+
+    }
+}; 
+
+   // ઓપ્શન્સને મિક્સ કરવા માટેનું ફંક્શન
+function shuffleArray(array) {
+    let shuffled = [...array]; 
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+}
+      
+ 
+
+let quiz=[],current=0,score=0,timeLeft=3600,timerId;
+let studentAnswers=[],answered=[];
+let results=JSON.parse(localStorage.getItem("results")||"[]");
+let photoURL="";
+
+document.getElementById("photo").onchange=e=>{
+const file=e.target.files[0];
+if(file){
+const reader=new FileReader();
+reader.onload=ev=>photoURL=ev.target.result;
+reader.readAsDataURL(file);
+}
+};
+
+function loadChapters(){
+const ch=document.getElementById("chapter");
+ch.innerHTML='<option value="">પાઠ પસંદ કરો</option>';
+const sub=document.getElementById("subject").value;
+if(sub && DATA[sub]){
+Object.keys(DATA[sub]).forEach(k=>{
+ch.innerHTML+=`<option value="${k}">${k}</option>`;
+});
+}
+}
+
+function setTheme(){
+const sub=document.getElementById("subject").value;
+document.querySelectorAll('.card').forEach(c=>{
+c.classList.remove("river","maths");
+c.classList.add(sub==="maths"?"maths":"river");
+});
+}
+
+function startQuiz(){
+const roll=document.getElementById("roll").value.trim();
+const name=document.getElementById("studentName").value.trim();
+const sub=document.getElementById("subject").value;
+const ch=document.getElementById("chapter").value;
+
+if(!roll||!name||!sub||!ch){alert("બધી માહિતી ભરો!");return;}
+
+quiz=[...(DATA[sub][ch]||[])];
+quiz.sort(()=>Math.random()-0.5);
+
+current=0;score=0;timeLeft=3600;
+studentAnswers=[];
+answered=new Array(quiz.length).fill(false);
+
+document.getElementById("home").classList.add("hidden");
+document.getElementById("quiz").classList.remove("hidden");
+
+createPalette();
+startTimer();
+showQuestion();
+}
+
+function createPalette(){
+const pal=document.getElementById("palette");
+pal.innerHTML="";
+quiz.forEach((_,i)=>{
+const btn=document.createElement("button");
+btn.textContent=i+1;
+btn.id="p"+i;
+btn.onclick=()=>goToQuestion(i);
+pal.appendChild(btn);
+});
+}
+
+function goToQuestion(i){
+current=i;
+showQuestion();
+}
+
+function startTimer(){
+timerId=setInterval(()=>{
+const m=Math.floor(timeLeft/60);
+const s=timeLeft%60;
+document.getElementById("timer").textContent=`⏱ ${m}:${s<10?"0":""}${s}`;
+if(timeLeft<=60) document.getElementById("timer").classList.add("timer-warning");
+timeLeft--;
+if(timeLeft<0) finishQuiz();
+},1000);
+}
+
+function showQuestion(){
+if(current>=quiz.length)return finishQuiz();
+
+document.getElementById("progress").textContent=`પ્રશ્ન ${current+1}/${quiz.length}`;
+document.getElementById("q").textContent=quiz[current].q;
+
+document.querySelectorAll("#palette button").forEach(b=>b.classList.remove("active"));
+document.getElementById("p"+current).classList.add("active");
+
+const opts=document.getElementById("opts");
+opts.innerHTML="";
+
+// ઓપ્શન્સને પહેલા શફલ કરો
+const shuffledOptions = shuffleArray(quiz[current].o);
+
+// હવે શફલ થયેલા ઓપ્શન્સ પર લૂપ ફેરવો
+shuffledOptions.forEach(opt=>{
+    const d=document.createElement("div");
+    d.className="option";
+    d.textContent=opt;
+    d.onclick=()=>checkAnswer(opt,d);
+    opts.appendChild(d);
+});
+}
+
+
+function checkAnswer(selected,element){
+if(answered[current]) return;
+
+const correct=quiz[current].a;
+answered[current]=true;
+
+if(selected===correct){
+score++;
+element.classList.add("right");
+document.getElementById("p"+current).style.background="#28a745";
+}else{
+element.classList.add("wrong");
+document.getElementById("p"+current).style.background="#dc3545";
+[...document.querySelectorAll(".option")].forEach(opt=>{
+if(opt.textContent===correct){
+opt.classList.add("right");
+}
+});
+}
+
+studentAnswers.push({
+question:quiz[current].q,
+selected:selected,
+correct:correct,
+isCorrect:selected===correct
+});
+
+setTimeout(()=>{
+current++;
+showQuestion();
+},800);
+}
+
+function finishQuiz() {
+    clearInterval(timerId);
+    document.getElementById("quiz").classList.add("hidden");
+    const resDiv = document.getElementById("result");
+    resDiv.classList.remove("hidden");
+
+    const percent = Math.round((score / quiz.length) * 100);
+    const sName = document.getElementById("studentName").value.trim();
+    const roll = document.getElementById("roll").value.trim();
+    const sub = document.getElementById("subject").value;
+    const ch = document.getElementById("chapter").value;
+    
+    let wrongCount = quiz.length - score;
+
+    // અહીં હેડિંગમાં વિદ્યાર્થીનું નામ ઉમેર્યું છે
+    let html = `
+        <h2 style="color:#1a1a2e; text-align:center; font-size:26px; text-shadow: 1px 1px 2px rgba(0,0,0,0.1);">
+            🌟 ${sName} નું પરિણામ 🌟
+        </h2>
+        
+        <div class="stat-box">
+            <div class="stat-item" style="border-bottom: 5px solid #2ecc71;">
+                <span class="stat-value" style="color:#2ecc71;">${score}</span>
+                <span class="stat-label">સાચા જવાબ</span>
+            </div>
+            <div class="stat-item" style="border-bottom: 5px solid #e74c3c;">
+                <span class="stat-value" style="color:#e74c3c;">${wrongCount}</span>
+                <span class="stat-label">ખોટા જવાબ</span>
+            </div>
+            <div class="stat-item" style="border-bottom: 5px solid #f1c40f;">
+                <span class="stat-value" style="color:#f1c40f;">${percent}%</span>
+                <span class="stat-label">ટકાવારી</span>
+            </div>
+        </div>
+    `;
+
+    // ભૂલો બતાવવાનું લિસ્ટ - અહીં ફોન્ટ ડાર્ક કર્યા છે
+    let wrongList = studentAnswers.filter(a => !a.isCorrect);
+    if (wrongList.length > 0) {
+        html += "<h3 style='color:#d81b60; text-align:left; margin-left:10px; font-size:18px;'>❌ તમારી ભૂલો સુધારો:</h3>";
+        html += "<div style='max-height:220px; overflow-y:auto; margin-bottom:15px; padding:5px;'>";
+        wrongList.forEach((w, index) => {
+            html += `
+                <div style="background:white; padding:12px; margin-bottom:10px; border-radius:12px; font-size:15px; box-shadow:0 4px 6px rgba(0,0,0,0.05); text-align:left; color:#1a1a2e; border-left:6px solid #e74c3c;">
+                    <b style="color:#444;">પ્રશ્ન ${index + 1}:</b> <span style="font-weight:600;">${w.question}</span><br>
+                    <div style="margin-top:5px;">
+                        <span style="color:#d32f2f; font-weight:bold;">તમારો જવાબ: ${w.selected}</span><br>
+                        <span style="color:#1b5e20; font-weight:bold;">સાચો જવાબ: ${w.correct}</span>
+                    </div>
+                </div>`;
+        });
+        html += "</div>";
+    } else {
+        html += "<div style='background:#27ae60; color:white; padding:15px; border-radius:10px; margin-bottom:15px; font-weight:bold;'>અદભુત! તમે બધા જ સાચા જવાબ આપ્યા છે. 🏆</div>";
+    }
+
+    html += `
+        <button onclick="showFinalCertificate()" style="background:#2ecc71; font-size:18px; padding:15px; box-shadow: 0 4px 15px rgba(46, 204, 113, 0.4);">📜 VIEW CERTIFICATE</button>
+        <button onclick="goHome()" style="background:#444; margin-top:8px;">🏠 મુખ્ય મેનુ</button>
+    `;
+    resDiv.innerHTML = html;
+
+    saveResultToLocal(roll, sName, sub, ch, score, quiz.length, percent);
+}
+function saveResultToLocal(roll, name, subject, chapter, score, total, percent) {
+    const now = new Date();
+    const dateStr = now.toLocaleDateString() + " " + now.getHours() + ":" + now.getMinutes();
+    
+    const newResult = {
+        roll: roll,
+        name: name,
+        subject: subject,
+        chapter: chapter,
+        score: score,
+        total: total,
+        percent: percent,
+        date: dateStr
+    };
+
+    results.push(newResult);
+    localStorage.setItem("results", JSON.stringify(results));
+}
+function showFinalCertificate() {
+    const resDiv = document.getElementById("result");
+    let percentage = Math.round((score / quiz.length) * 100);
+    let sName = document.getElementById("studentName").value.trim();
+    let chName = document.getElementById("chapter").value;
+    
+    let feedback = (percentage >= 80) ? "ખૂબ સરસ! 🏆" : (percentage >= 50) ? "સરસ પ્રયત્ન! 👍" : "ફરી પ્રયત્ન કરો. 💪";
+    let color = (percentage >= 50) ? "#27ae60" : "#e74c3c";
+
+    resDiv.innerHTML = `
+        <div id="capture-area" style="background: white; border: 10px double #0561af; padding: 20px; border-radius: 15px; text-align: center; color: #333; width: 100%; max-width: 550px; margin: 0 auto; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+            
+            <h2 style="color: #0561af; margin: 0; font-size: 24px; text-decoration: underline;">અભિનંદન પત્ર</h2>
+            
+            <p style="font-size: 14px; margin: 10px 0;">આથી પ્રમાણપત્ર  આપવામાં આવે છે કે, આપે <b>"${chName}"</b> પાઠની ક્વિઝમાં સફળતાપૂર્વક ભાગ લીધેલ છે.</p>
+            
+           <h3 style="font-size: 32px; color: #191970; border-bottom: 2px solid #34495e; display: inline-block; padding: 0 20px; margin: 10px 0; font-family: 'Segoe UI', Arial, sans-serif; font-weight: 700; letter-spacing: 1px;">
+                 ${sName}
+             </h3>
+           
+            
+            <table style="width: 100%; margin: 10px auto; border-collapse: collapse; font-size: 14px; background: #f9f9f9;">
+                <thead style="background: #0561af; color: white;">
+                    <tr>
+                        <th style="padding: 8px; border: 1px solid #ddd;">મેળવેલ ગુણ</th>
+                        <th style="padding: 8px; border: 1px solid #ddd;">કુલ ગુણ</th>
+                        <th style="padding: 8px; border: 1px solid #ddd;">ટકાવારી</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold; color: #27ae60;">${score}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">${quiz.length}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold; color: #e67e22;">${percentage}%</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p style="font-size: 16px; font-weight: bold; color: ${color}; margin: 5px 0;">${feedback}</p>
+            
+            <div style="margin-top: 15px; display: flex; justify-content: space-between; align-items: flex-end; border-top: 1px solid #eee; padding-top: 10px;">
+                <div style="text-align: left;">
+                    <p style="font-size: 11px; color: #666; margin: 0;">તારીખ: ${new Date().toLocaleDateString()}</p>
+                </div>
+                <div style="text-align: right;">
+                    <p style="font-weight: bold; color: #0561af; margin: 0; font-size: 13px;">રાજકોટ પ્રાથમિક શાળા</p>
+                    <p style="font-size: 12px; color: #333; margin: 0;">માર્ગદર્શક: બળવંતભાઈ ઠાકોર</p>
+                </div>
+            </div>
+        </div>
+        
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
+            <button onclick="downloadCert()" style="background:#3498db; width: 100%; border-radius: 10px; padding: 12px; font-weight: bold;">📥 પ્રમાણપત્ર ડાઉનલોડ</button>
+            <button onclick="location.reload()" style="background: #444; width: 100%; border-radius: 10px; padding: 10px;">🏠 મુખ્ય મેનુ</button>
+        </div>
+    `;
+}
+// સર્ટિફિકેટ ડાઉનલોડ કરવાનું ફંક્શન
+function downloadCert() {
+    const area = document.getElementById("capture-area");
+    html2canvas(area).then(canvas => {
+        const link = document.createElement('a');
+        link.download = 'My_Certificate.png';
+        link.href = canvas.toDataURL();
+        link.click();
+    });
+}
+function openTeacher(){
+    document.getElementById("home").classList.add("hidden");
+    document.getElementById("teacherLoginBox").classList.remove("hidden");
+}
+
+function teacherLogin(){
+    // તમારો પાસવર્ડ અહીં બદલી શકાય છે
+    if(document.getElementById("tpass").value === "admin123"){
+        document.getElementById("teacherLoginBox").classList.add("hidden");
+        document.getElementById("teacher").classList.remove("hidden");
+
+        // ટેબલમાં ડેટા બતાવવાનું લોજિક
+        const tableBody = document.getElementById("table");
+        tableBody.innerHTML = results.map(r => `
+            <tr>
+                <td style="padding:10px; border:1px solid #ddd;">${r.roll}</td>
+                <td style="padding:10px; border:1px solid #ddd;">${r.name}</td>
+                <td style="padding:10px; border:1px solid #ddd;">${r.subject}</td>
+                <td style="padding:10px; border:1px solid #ddd;">${r.chapter}</td>
+               <td>
+                   <div class="fraction">
+                     <span class="numerator">${r.score}</span>
+                     <span class="denominator">${r.total}</span>
+                  </div>
+                </td>
+
+                <td class="res-percent">${r.percent}%</td>
+                <td style="padding:10px; border:1px solid #ddd;">${r.date}</td>
+
+             
+            </tr>
+        `).join("");
+    } else {
+        alert("ખોટો પાસવર્ડ! ફરીથી પ્રયત્ન કરો.");
+    }
+}
+
+
+
+function downloadExcel() {
+    if (results.length === 0) {
+        alert("ડાઉનલોડ કરવા માટે કોઈ ડેટા નથી!");
+        return;
+    }
+
+    // Excel ને ગુજરાતી સમજાવવા માટે BOM ઉમેરવો જરૂરી છે
+    let csvContent = "\uFEFF"; // આ BOM છે જે ગુજરાતી અક્ષરોને Excel માં સાચા બતાવશે
+    csvContent += "Roll No,Name,Subject,Chapter,Score,Total,Percentage,Date\n";
+
+    results.forEach(r => {
+        let row = `${r.roll},${r.name},${r.subject},${r.chapter},${r.score},${r.total},${r.percent}%,${r.date}`;
+        csvContent += row + "\n";
+    });
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", "Quiz_Results_Antrol_School.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+function showResult() {
+    const resultDiv = document.getElementById("result");
+    
+    let percentage = (score / quiz.length) * 100;
+    let sName = document.getElementById("studentName").value.trim();
+    let feedback = (percentage >= 50) ? "ખૂબ સરસ! મહેનત રંગ લાવી. 🌟" : "વધુ મહેનત કરો, તમે કરી શકો છો! 💪";
+    let color = (percentage >= 50) ? "#27ae60" : "#e74c3c";
+
+    resultDiv.innerHTML = `
+        <div id="certificate" style="background: white; border: 8px double #0561af; padding: 25px; border-radius: 20px; text-align: center; color: #333; box-shadow: 0 10px 20px rgba(0,0,0,0.1);">
+            <h2 style="color: #0561af; margin: 0; font-size: 28px;">અભિનંદન પત્ર</h2>
+            <p style="font-size: 16px; margin: 10px 0;">આથી પ્રમાણપત્ર આપવામાં આવે છે કે,</p>
+            <h3 style="font-size: 26px; color: #1a1a2e; border-bottom: 2px solid #ddd; display: inline-block; padding: 0 10px;">${sName}</h3>
+            <p style="font-size: 16px; margin: 10px 0;">એ ક્વિઝમાં શ્રેષ્ઠ પ્રદર્શન કરી મેળવેલ ગુણ:</p>
+            <div style="font-size: 45px; font-weight: bold; color: ${color}; margin: 15px 0;">
+                ${score} / ${quiz.length}
+            </div>
+            <p style="font-size: 18px; font-weight: bold; color: ${color};">${feedback}</p>
+            <p style="margin-top: 20px; font-weight: bold; color: #0561af; border-top: 1px solid #eee; padding-top: 10px;">રાજકોટ પ્રાથમિક શાળા</p>
+            <p style="font-size: 12px; color: #666;">માર્ગદર્શક: શ્રી બળવંતભાઈ ઠાકોર</p>
+        </div>
+        <button class="btn" onclick="location.reload()" style="margin-top: 20px; width: 100%; padding: 12px; border-radius: 12px; border: none; background: #673ab7; color: white; font-weight: bold; cursor: pointer;">🏠 મુખ્ય મેનુ</button>
+    `;
+}
+
+
+function goHome(){location.reload();}
+function clearAllResults(){
+    if(results.length === 0) return;
+    if(confirm("શું તમે ખરેખર બધા પરિણામો ડિલીટ કરવા માંગો છો? આ ડેટા પાછો નહીં મળે.")){
+        localStorage.removeItem("results");
+        results = [];
+        document.getElementById("table").innerHTML = "";
+        alert("બધા પરિણામો સફળતાપૂર્વક ડિલીટ થયા છે.");
+    }
+}
+
+</script>
+<div class="p_info"></div>
+
+<script>
+(function(){
+
+let a=[80,73,78,65,76,32,83,79,76,65,78,75,73];
+let b=[65,110,116,114,111,108,32,80,114,105,109,97,114,121,32,83,99,104,111,111,108];
+
+function decode(arr){
+    return arr.map(x=>String.fromCharCode(x)).join('');
+}
+
+let footerHTML =
+"<p style='color:#0561af;font-family:Arial,sans-serif;font-weight:bold;'>"
++ decode(a) +
+" , <span style='color:#555;font-weight:normal;'>"
++ decode(b) +
+"</span></p>";
+
+document.querySelectorAll('.card').forEach(card=>{
+    let d=document.createElement("div");
+    d.className="p_info";
+    d.innerHTML=footerHTML;
+    card.appendChild(d);
+});
+
+})();
+</script>
+</body>
+</html>
